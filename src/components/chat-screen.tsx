@@ -414,7 +414,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
   };
 
   const renderSuggestions = () => {
-    if (messages.length > 0) return null;
+    if (messageText.trim().length > 0) return null;
     const suggestions = role === "buyer" ? BUYER_SUGGESTIONS : SELLER_SUGGESTIONS;
     return (
       <View style={s.suggestionsWrap}>
