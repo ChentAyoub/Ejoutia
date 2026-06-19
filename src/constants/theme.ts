@@ -9,12 +9,14 @@ export const Brand = {
   orange: '#ff9e40',      
   
   // Accents
+  beige: '#D9C9A3',
+  beigeLight: 'rgba(217, 201, 163, 0.15)',
   blue: '#4A90D9',
   blueLight: '#E8F2FC',
-  green: '#34C759',
-  greenLight: 'rgba(52, 199, 89, 0.15)', // Dark mode friendly
-  red: '#FF3B30',
-  redLight: 'rgba(255, 59, 48, 0.15)',   // Dark mode friendly
+  green: '#1B5E20',
+  greenLight: 'rgba(27, 94, 32, 0.15)', 
+  red: '#B71C1C',
+  redLight: 'rgba(183, 28, 28, 0.15)',
   
   // Surfaces & Backgrounds
   bgDark: '#121212',        // App Background

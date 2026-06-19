@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
   StatusBar,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -14,6 +13,8 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { db } from '../../firebaseConfig';
 import { Brand, Shadow, Radius } from '../../constants/theme';
+import BrandLoader from '../../components/brand-loader';
+import { Ionicons } from '@expo/vector-icons';
 
 /* ────────────────────────────────────────────
    Relative-time helper (French)
@@ -69,9 +70,9 @@ export default function Inbox() {
   /* ── Loading state ── */
   if (loading) {
     return (
-      <View style={styles.centered}>
+      <View style={{ flex: 1, backgroundColor: Brand.bgDark }}>
         <StatusBar barStyle="light-content" backgroundColor={Brand.bgDark} />
-        <ActivityIndicator size="large" color={Brand.primary} />
+        <BrandLoader />
       </View>
     );
   }
@@ -96,7 +97,9 @@ export default function Inbox() {
       {/* ── Empty state ── */}
       {convos.length === 0 ? (
         <View style={styles.centered}>
-          <Text style={styles.emptyEmoji}>💬</Text>
+          <View style={styles.emptyIconCircle}>
+            <Ionicons name="chatbubbles-outline" size={48} color={Brand.primary} />
+          </View>
           <Text style={styles.emptyText}>Aucun message</Text>
           <Text style={styles.emptySubtext}>
             Vos conversations apparaîtront ici
@@ -168,7 +171,7 @@ export default function Inbox() {
                     ]}
                     numberOfLines={1}
                   >
-                    {item.lastMessage}
+                    {item.lastMessageSenderId === "buyer" ? "Vous: " : ""}{item.lastMessage}
                   </Text>
                 </View>
 
@@ -207,6 +210,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Brand.bgDark,
+    paddingHorizontal: 24,
+  },
+  
+  emptyIconCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 111, 0, 0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
   },
 
   /* Header */
@@ -239,20 +253,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Brand.bgDark,
-    paddingHorizontal: 24,
-    paddingVertical: 18,
-    position: 'relative',
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    marginBottom: 4,
   },
   rowUnread: {
     backgroundColor: Brand.surface,
+    borderRadius: Radius.lg,
+    marginHorizontal: 8,
+    paddingHorizontal: 16,
   },
   unreadVerticalLine: {
     position: 'absolute',
     left: 0,
-    top: 0,
-    bottom: 0,
+    top: '20%',
+    bottom: '20%',
     width: 4,
     backgroundColor: Brand.primary,
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
   },
 
   /* Avatar */
@@ -260,20 +279,20 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: Brand.surfaceLight,
   },
   onlineDot: {
     position: 'absolute',
     bottom: 2,
     right: 2,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     backgroundColor: Brand.green,
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: Brand.bgDark,
   },
 
@@ -281,17 +300,17 @@ const styles = StyleSheet.create({
   middle: {
     flex: 1,
     marginLeft: 16,
-    marginRight: 12,
+    marginRight: 16,
     justifyContent: 'center',
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   sellerName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: Brand.text,
     flex: 1,
@@ -307,13 +326,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   itemTitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: Brand.text,
     fontWeight: '700',
     marginBottom: 4,
   },
   lastMessage: {
-    fontSize: 15,
+    fontSize: 14,
     color: Brand.subText,
     lineHeight: 20,
   },
@@ -329,19 +348,19 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   itemPhoto: {
-    width: 54,
-    height: 54,
+    width: 68,
+    height: 68,
     borderRadius: Radius.md,
     backgroundColor: Brand.surfaceLight,
   },
   unreadBadge: {
     position: 'absolute',
-    top: -8,
-    right: -8,
+    top: -6,
+    right: -6,
     backgroundColor: Brand.primary,
     borderRadius: Radius.full,
-    minWidth: 24,
-    height: 24,
+    minWidth: 22,
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,

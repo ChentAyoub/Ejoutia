@@ -12,6 +12,7 @@ type UserInfo = {
   totalPurchases?: number;
   memberSince: number;
   verified: boolean;
+  _id?: string;
 };
 
 type Listing = {
@@ -48,12 +49,20 @@ export default function ChatHeader({
           <Text style={styles.backText}>‹</Text>
         </TouchableOpacity>
         
-        <View style={styles.avatarContainer}>
+        <TouchableOpacity 
+          style={styles.avatarContainer}
+          activeOpacity={0.8}
+          onPress={() => {
+            if (otherUser._id) {
+              router.push(`/user/${otherUser._id}`);
+            }
+          }}
+        >
           <Image source={{ uri: otherUser.avatar }} style={styles.avatar} />
           <View style={styles.onlineBadge}>
             <View style={styles.onlineDot} />
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.userInfo}>
           <View style={styles.nameRow}>

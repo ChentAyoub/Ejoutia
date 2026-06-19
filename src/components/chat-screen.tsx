@@ -9,6 +9,7 @@ import {
   query,
   updateDoc,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -23,6 +24,7 @@ import {
   TouchableOpacity,
   Vibration,
   View,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ConfettiCannon from "react-native-confetti-cannon";
@@ -31,6 +33,7 @@ import { Brand, Radius, Shadow } from "../constants/theme";
 import AudioBubble from "./audio-bubble";
 import ChatHeader from "./chat-header";
 import EmojiPicker from "./emoji-picker";
+import BrandLoader from "./brand-loader";
 
 // ─── Types ───
 interface ChatMessage {
@@ -42,6 +45,7 @@ interface ChatMessage {
   amount?: number;
   status?: "pending" | "accepted" | "refused";
   audioDuration?: number;
+  seen?: boolean;
 }
 
 const BUYER_SUGGESTIONS = [
@@ -56,6 +60,20 @@ const SELLER_SUGGESTIONS = [
   "Je peux livrer",
   "Envoyez une offre",
 ];
+
+// ─── Helpers ───
+const isSameDay = (d1: Date, d2: Date) => d1.toDateString() === d2.toDateString();
+
+const getDateDividerString = (date: Date) => {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (isSameDay(date, today)) return "Aujourd'hui";
+  if (isSameDay(date, yesterday)) return "Hier";
+  
+  return date.toLocaleDateString("fr-FR", { weekday: 'long', day: 'numeric', month: 'long' });
+};
 
 export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
   const { conversationId } = useLocalSearchParams<{ conversationId: string }>();
@@ -75,12 +93,16 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
   const [showEmoji, setShowEmoji] = useState(false);
   const [messageText, setMessageText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
+
   const recordingPulse = useRef(new Animated.Value(1)).current;
   const confettiRef = useRef<any>(null);
   const flatListRef = useRef<FlatList>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // ─── Load header data ───
+  // ─── Load header data & listen to conversation for typing state ───
   useEffect(() => {
+    let unsubConv: any = null;
     const load = async () => {
       const cSnap = await getDoc(doc(db, "conversations", convId));
       if (!cSnap.exists()) return;
@@ -88,13 +110,27 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
       const otherId = role === "buyer" ? conv.sellerId : conv.buyerId;
       const uSnap = await getDoc(doc(db, "users", otherId));
       const lSnap = await getDoc(doc(db, "listings", conv.listingId));
-      if (uSnap.exists()) setOtherUser(uSnap.data());
+      if (uSnap.exists()) {
+        const userData = uSnap.data();
+        setOtherUser({ ...userData, _id: otherId });
+      }
       if (lSnap.exists()) setListing(lSnap.data());
+
+      // Listen to typing state
+      unsubConv = onSnapshot(doc(db, "conversations", convId), (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setOtherTyping(role === "buyer" ? !!data.typingSeller : !!data.typingBuyer);
+        }
+      });
     };
     load();
+    return () => {
+      if (unsubConv) unsubConv();
+    };
   }, [role, convId]);
 
-  // ─── Real-time messages ───
+  // ─── Real-time messages & Mark as Seen ───
   useEffect(() => {
     const q = query(
       collection(db, "messages"),
@@ -102,24 +138,44 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
       orderBy("createdAt", "asc")
     );
     const unsub = onSnapshot(q, (snap) => {
-      setMessages(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            _id: d.id,
-            text: data.text ?? "",
-            createdAt: data.createdAt?.toDate?.() ?? new Date(),
-            user: data.user,
-            type: data.type ?? "text",
-            amount: data.amount,
-            status: data.status,
-            audioDuration: data.audioDuration,
-          } as ChatMessage;
-        })
-      );
+      const parsedMessages: ChatMessage[] = [];
+      const batch = writeBatch(db);
+      let hasUnread = false;
+
+      snap.docs.forEach((d) => {
+        const data = d.data();
+        const msg = {
+          _id: d.id,
+          text: data.text ?? "",
+          createdAt: data.createdAt?.toDate?.() ?? new Date(),
+          user: data.user,
+          type: data.type ?? "text",
+          amount: data.amount,
+          status: data.status,
+          audioDuration: data.audioDuration,
+          seen: !!data.seen,
+        } as ChatMessage;
+
+        parsedMessages.push(msg);
+
+        // Mark as seen if it's from the other user and not seen yet
+        if (msg.user._id !== me._id && !msg.seen) {
+          batch.update(d.ref, { seen: true });
+          hasUnread = true;
+        }
+      });
+
+      setMessages(parsedMessages);
+      if (hasUnread) {
+        batch.commit().catch(console.error);
+        // Also clear unread counter on the conversation doc just in case
+        updateDoc(doc(db, "conversations", convId), {
+          [role === "buyer" ? "unreadBuyer" : "unreadSeller"]: 0
+        }).catch(console.error);
+      }
     });
     return unsub;
-  }, [convId]);
+  }, [convId, me._id, role]);
 
   // ─── Recording pulse ───
   useEffect(() => {
@@ -136,19 +192,44 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
     }
   }, [isRecording]);
 
+  // ─── Typing Debounce ───
+  const handleTextChange = (text: string) => {
+    setMessageText(text);
+    const typingField = role === "buyer" ? "typingBuyer" : "typingSeller";
+    
+    // Set typing true
+    updateDoc(doc(db, "conversations", convId), { [typingField]: true }).catch(() => {});
+    
+    // Debounce false
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      updateDoc(doc(db, "conversations", convId), { [typingField]: false }).catch(() => {});
+    }, 2000);
+  };
+
+  const clearTypingState = () => {
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    const typingField = role === "buyer" ? "typingBuyer" : "typingSeller";
+    updateDoc(doc(db, "conversations", convId), { [typingField]: false }).catch(() => {});
+  };
+
   const sendMessage = useCallback(
     async (text: string) => {
       if (!text.trim()) return;
+      clearTypingState();
+
       await addDoc(collection(db, "messages"), {
         text: text.trim(),
         createdAt: new Date(),
         user: me,
         type: "text",
         conversationId: convId,
+        seen: false,
       });
       await updateDoc(doc(db, "conversations", convId), {
         lastMessage: text.trim(),
         lastTime: new Date(),
+        lastMessageSenderId: me._id,
       });
       setShowEmoji(false);
       setMessageText("");
@@ -157,6 +238,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
   );
 
   const sendOffer = async (amount: number) => {
+    clearTypingState();
     await addDoc(collection(db, "messages"), {
       text: `Offre: ${amount} DH`,
       createdAt: new Date(),
@@ -165,10 +247,12 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
       amount,
       status: "pending",
       conversationId: convId,
+      seen: false,
     });
     await updateDoc(doc(db, "conversations", convId), {
       lastMessage: `💰 Offre: ${amount} DH`,
       lastTime: new Date(),
+      lastMessageSenderId: me._id,
     });
     setOfferModal(false);
     setCounterModal(null);
@@ -176,6 +260,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
   };
 
   const sendAudioMessage = async () => {
+    clearTypingState();
     const fakeDuration = 3 + Math.floor(Math.random() * 25);
     await addDoc(collection(db, "messages"), {
       text: "Message vocal",
@@ -184,10 +269,12 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
       type: "audio",
       audioDuration: fakeDuration,
       conversationId: convId,
+      seen: false,
     });
     await updateDoc(doc(db, "conversations", convId), {
       lastMessage: "🎙 Message vocal",
       lastTime: new Date(),
+      lastMessageSenderId: me._id,
     });
   };
 
@@ -220,20 +307,28 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
 
   const renderMessage = ({ item, index }: { item: ChatMessage; index: number }) => {
     const isMine = item.user._id === me._id;
-    const showTime =
-      index === 0 ||
-      item.createdAt.getTime() - messages[index - 1].createdAt.getTime() > 300000;
+    
+    // Date divider logic
+    const prevMessage = index > 0 ? messages[index - 1] : null;
+    const isNewDay = !prevMessage || !isSameDay(item.createdAt, prevMessage.createdAt);
 
     return (
       <View style={s.messageWrapper}>
-        {showTime && (
-          <Text style={s.timeStamp}>{formatTime(item.createdAt)}</Text>
+        {isNewDay && (
+          <View style={s.dateDividerWrap}>
+            <View style={s.dateDividerPill}>
+              <Text style={s.dateDividerText}>{getDateDividerString(item.createdAt)}</Text>
+            </View>
+          </View>
         )}
 
         {/* Audio bubble */}
         {item.type === "audio" && (
           <View style={[s.bubbleRow, isMine ? s.bubbleRowRight : s.bubbleRowLeft]}>
             <AudioBubble duration={item.audioDuration ?? 12} isMine={isMine} />
+            {isMine && (
+              <Text style={s.seenReceiptOutside}>{item.seen ? '✓✓' : '✓'}</Text>
+            )}
           </View>
         )}
 
@@ -285,6 +380,9 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
                 </View>
               )}
             </View>
+            {isMine && (
+              <Text style={s.seenReceiptOutside}>{item.seen ? '✓✓' : '✓'}</Text>
+            )}
           </View>
         )}
 
@@ -299,7 +397,9 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
                 style={[s.bubble, s.sharpRight]}
               >
                 <Text style={[s.bubbleText, s.bubbleTextMine]}>{item.text}</Text>
-                <Text style={[s.bubbleTimeInside, s.bubbleTimeMine]}>{formatTime(item.createdAt)}</Text>
+                <Text style={[s.bubbleTimeInside, s.bubbleTimeMine]}>
+                  {formatTime(item.createdAt)}  {item.seen ? '✓✓' : '✓'}
+                </Text>
               </LinearGradient>
             ) : (
               <View style={[s.bubble, s.bubbleTheirs, s.sharpLeft]}>
@@ -343,11 +443,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
     : [50, 100, 150];
 
   if (!otherUser || !listing) {
-    return (
-      <View style={s.loading}>
-        <ActivityIndicator size="large" color={Brand.primary} />
-      </View>
-    );
+    return <BrandLoader />;
   }
 
   return (
@@ -366,6 +462,15 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
             flatListRef.current?.scrollToEnd({ animated: true })
           }
           ListEmptyComponent={renderSuggestions}
+          ListFooterComponent={() => (
+            otherTyping ? (
+              <View style={[s.bubbleRow, s.bubbleRowLeft, { marginTop: 8 }]}>
+                <View style={[s.bubble, s.bubbleTheirs, s.sharpLeft, s.typingBubble]}>
+                  <Text style={s.typingDots}>•••</Text>
+                </View>
+              </View>
+            ) : <View style={{ height: 8 }} />
+          )}
         />
       </View>
 
@@ -386,15 +491,14 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
             <TouchableOpacity onPress={() => setShowEmoji(!showEmoji)} style={s.iconBtn}>
               <Text style={s.iconEmoji}>{showEmoji ? "⌨️" : "😊"}</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity onPress={() => { setOfferModal(true); setAmountInput(""); }} style={s.iconBtn}>
-              <Text style={s.iconEmoji}>💸</Text>
+            <TouchableOpacity onPress={() => { setOfferModal(true); setAmountInput(""); }} style={s.offerActionBtn}>
+              <Text style={s.offerActionBtnText}>Offre</Text>
             </TouchableOpacity>
 
             <TextInput
               style={s.textInput}
               value={messageText}
-              onChangeText={setMessageText}
+              onChangeText={handleTextChange}
               placeholder="Message..."
               placeholderTextColor={Brand.subText}
               multiline
@@ -423,13 +527,14 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
 
       <EmojiPicker
         visible={showEmoji}
-        onSelect={(emoji) => setMessageText((prev) => prev + emoji)}
+        onSelect={(emoji) => handleTextChange(messageText + emoji)}
         onClose={() => setShowEmoji(false)}
       />
 
       <ConfettiCannon
         count={120}
-        origin={{ x: 200, y: 0 }}
+        origin={{ x: Dimensions.get('window').width / 2, y: Dimensions.get('window').height / 2 }}
+        colors={[Brand.green, Brand.red]}
         autoStart={false}
         fadeOut
         ref={confettiRef}
@@ -575,6 +680,23 @@ const s = StyleSheet.create({
 
   messageWrapper: { marginBottom: 12 },
   
+  dateDividerWrap: {
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dateDividerPill: {
+    backgroundColor: Brand.surface,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: Radius.full,
+  },
+  dateDividerText: {
+    color: Brand.subText,
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "capitalize",
+  },
+  
   timeStamp: {
     textAlign: "center",
     color: Brand.subText,
@@ -610,6 +732,20 @@ const s = StyleSheet.create({
   bubbleTimeInside: { fontSize: 10, fontWeight: "600", marginBottom: 2 },
   bubbleTimeMine: { color: "rgba(255,255,255,0.7)" },
   bubbleTimeTheirs: { color: Brand.subText },
+  seenReceiptOutside: { color: Brand.subText, fontSize: 10, marginTop: 4, marginRight: 4, fontWeight: '700' },
+
+  typingBubble: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    alignSelf: 'flex-start',
+  },
+  typingDots: {
+    color: Brand.text,
+    fontSize: 24,
+    lineHeight: 24,
+    letterSpacing: 2,
+    marginTop: -8,
+  },
 
   suggestionsWrap: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, paddingBottom: 20 },
   suggestionsTitle: { fontSize: 16, fontWeight: "700", color: Brand.subText, marginBottom: 24, textAlign: "center" },
@@ -640,6 +776,20 @@ const s = StyleSheet.create({
     ...Shadow.lg,
   },
   iconBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  offerActionBtn: {
+    backgroundColor: Brand.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: Radius.lg,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  offerActionBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
   iconEmoji: { fontSize: 24 },
   textInput: {
     flex: 1,
