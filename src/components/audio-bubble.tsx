@@ -70,15 +70,15 @@ export default function AudioBubble({ duration = 12, isMine }: AudioBubbleProps)
 
   const playButtonBg = isMine
     ? 'rgba(255,255,255,0.25)'
-    : Brand.warmGray;
+    : Brand.surface;
 
   const playIconColor = isMine
-    ? Brand.white
-    : Brand.charcoal;
+    ? '#FFFFFF'
+    : Brand.text;
 
   const durationColor = isMine
-    ? 'rgba(255,255,255,0.9)'
-    : Brand.grayDark;
+    ? '#FFFFFF'
+    : Brand.subText;
 
   const innerContent = (
     <>
@@ -98,9 +98,9 @@ export default function AudioBubble({ duration = 12, isMine }: AudioBubbleProps)
 
           let barColor: string;
           if (isPlayed) {
-            barColor = isMine ? Brand.white : Brand.coral;
+            barColor = isMine ? '#FFFFFF' : Brand.primary;
           } else {
-            barColor = isMine ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)';
+            barColor = isMine ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.2)';
           }
 
           return (
@@ -127,7 +127,7 @@ export default function AudioBubble({ duration = 12, isMine }: AudioBubbleProps)
   if (isMine) {
     return (
       <LinearGradient
-        colors={[Brand.coral, Brand.orange]}
+        colors={[Brand.primary, Brand.primaryLight]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.container, styles.bubbleMine]}
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 6,
   },
   bubbleTheirs: {
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surfaceLight,
     borderBottomLeftRadius: 6,
     ...Shadow.sm,
   },

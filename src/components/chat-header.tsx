@@ -107,10 +107,7 @@ export default function ChatHeader({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Brand.white,
-    // Extremely subtle border for a minimal, clean separation
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.03)',
+    backgroundColor: Brand.bgDark,
     zIndex: 10,
     paddingBottom: 6,
   },
@@ -120,7 +117,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 12,
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.bgDark,
   },
   backButton: {
     marginRight: 12,
@@ -130,7 +127,7 @@ const styles = StyleSheet.create({
   backText: {
     fontSize: 32,
     lineHeight: 32,
-    color: Brand.charcoal,
+    color: Brand.text,
     fontWeight: '300',
   },
   avatarContainer: {
@@ -140,7 +137,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: Brand.warmGray,
+    backgroundColor: Brand.surface,
   },
   onlineBadge: {
     position: 'absolute',
@@ -149,7 +146,7 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.bgDark,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadow.sm,
@@ -172,7 +169,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 19,
     fontWeight: '800',
-    color: Brand.charcoal,
+    color: Brand.text,
     letterSpacing: -0.5,
   },
   verifiedBadge: {
@@ -186,7 +183,7 @@ const styles = StyleSheet.create({
   verifiedText: {
     fontSize: 10,
     fontWeight: '800',
-    color: Brand.white,
+    color: Brand.text,
     lineHeight: 14,
   },
   statusRow: {
@@ -196,7 +193,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 13,
-    color: Brand.primaryLight,
+    color: Brand.subText,
     fontWeight: '600',
     letterSpacing: -0.2,
   },
@@ -204,12 +201,12 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: Brand.grayLight,
+    backgroundColor: Brand.subText,
     marginHorizontal: 8,
   },
   rating: {
     fontSize: 13,
-    color: Brand.grayDark,
+    color: Brand.subText,
     fontWeight: '600',
   },
 
@@ -223,7 +220,7 @@ const styles = StyleSheet.create({
   listingPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surface,
     borderRadius: 999, // Pill shape
     padding: 6,
     paddingRight: 8,
@@ -233,7 +230,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: Brand.warmGray,
+    backgroundColor: Brand.surfaceLight,
   },
   listingInfo: {
     flex: 1,
@@ -243,13 +240,13 @@ const styles = StyleSheet.create({
   listingTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: Brand.charcoal,
+    color: Brand.text,
     letterSpacing: -0.2,
   },
   firmTagText: {
     fontSize: 11,
     fontWeight: '600',
-    color: Brand.grayDark,
+    color: Brand.subText,
     marginTop: 2,
   },
   priceContainer: {
@@ -262,7 +259,7 @@ const styles = StyleSheet.create({
   listingPrice: {
     fontSize: 14,
     fontWeight: '800',
-    color: Brand.white,
+    color: Brand.text,
     letterSpacing: -0.3,
   },
 });

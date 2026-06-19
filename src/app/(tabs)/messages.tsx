@@ -12,8 +12,8 @@ import {
 import { useRouter } from 'expo-router';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
-import { db } from '../firebaseConfig';
-import { Brand, Radius } from '../constants/theme';
+import { db } from '../../firebaseConfig';
+import { Brand, Shadow, Radius } from '../../constants/theme';
 
 /* ────────────────────────────────────────────
    Relative-time helper (French)
@@ -70,7 +70,7 @@ export default function Inbox() {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <StatusBar barStyle="dark-content" backgroundColor={Brand.white} />
+        <StatusBar barStyle="light-content" backgroundColor={Brand.bgDark} />
         <ActivityIndicator size="large" color={Brand.primary} />
       </View>
     );
@@ -79,7 +79,7 @@ export default function Inbox() {
   /* ── Main render ── */
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="dark-content" backgroundColor={Brand.white} />
+      <StatusBar barStyle="light-content" backgroundColor={Brand.bgDark} />
 
       {/* ── Header ── */}
       <View style={styles.header}>
@@ -200,18 +200,18 @@ const styles = StyleSheet.create({
   /* Screen */
   screen: {
     flex: 1,
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.bgDark,
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.bgDark,
   },
 
   /* Header */
   header: {
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.bgDark,
     paddingTop: 60,
     paddingHorizontal: 24,
     paddingBottom: 24,
@@ -219,12 +219,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 42,
     fontWeight: '900',
-    color: Brand.charcoal,
+    color: Brand.text,
     letterSpacing: -1.2,
   },
   headerSubtitle: {
     fontSize: 15,
-    color: Brand.grayDark,
+    color: Brand.subText,
     marginTop: 4,
     fontWeight: '500',
   },
@@ -238,15 +238,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.bgDark,
     paddingHorizontal: 24,
     paddingVertical: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: Brand.grayLight,
     position: 'relative',
   },
   rowUnread: {
-    backgroundColor: Brand.greenLight,
+    backgroundColor: Brand.surface,
   },
   unreadVerticalLine: {
     position: 'absolute',
@@ -265,7 +263,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: Brand.grayLight,
+    backgroundColor: Brand.surfaceLight,
   },
   onlineDot: {
     position: 'absolute',
@@ -276,7 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: Brand.green,
     borderWidth: 3,
-    borderColor: Brand.white,
+    borderColor: Brand.bgDark,
   },
 
   /* Middle */
@@ -295,13 +293,13 @@ const styles = StyleSheet.create({
   sellerName: {
     fontSize: 18,
     fontWeight: '800',
-    color: Brand.charcoal,
+    color: Brand.text,
     flex: 1,
     marginRight: 8,
   },
   timeText: {
     fontSize: 13,
-    color: Brand.grayDark,
+    color: Brand.subText,
     fontWeight: '500',
   },
   timeTextUnread: {
@@ -310,17 +308,17 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 14,
-    color: Brand.primary,
+    color: Brand.text,
     fontWeight: '700',
     marginBottom: 4,
   },
   lastMessage: {
     fontSize: 15,
-    color: Brand.grayDark,
+    color: Brand.subText,
     lineHeight: 20,
   },
   lastMessageUnread: {
-    color: Brand.charcoal,
+    color: Brand.text,
     fontWeight: '700',
   },
 
@@ -334,7 +332,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: Radius.md,
-    backgroundColor: Brand.grayLight,
+    backgroundColor: Brand.surfaceLight,
   },
   unreadBadge: {
     position: 'absolute',
@@ -348,10 +346,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 6,
     borderWidth: 2,
-    borderColor: Brand.white,
+    borderColor: Brand.bgDark,
   },
   unreadBadgeText: {
-    color: Brand.white,
+    color: Brand.text,
     fontSize: 11,
     fontWeight: '800',
   },
@@ -364,12 +362,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 22,
     fontWeight: '800',
-    color: Brand.charcoal,
+    color: Brand.text,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 16,
-    color: Brand.grayDark,
+    color: Brand.subText,
     marginBottom: 32,
   },
   emptyButtonWrapper: {
@@ -387,7 +385,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyButtonText: {
-    color: Brand.white,
+    color: Brand.text,
     fontSize: 17,
     fontWeight: '700',
   },

@@ -6,7 +6,6 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Brand, Radius, Shadow } from '../constants/theme';
 
 interface EmojiPickerProps {
@@ -91,18 +90,13 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ visible, onSelect, onClose })
             <TouchableOpacity
               key={cat.label}
               onPress={() => setActiveCategory(index)}
-              style={styles.tab}
+              style={[styles.tab, isActive ? styles.activeTab : styles.inactiveTab]}
               activeOpacity={0.6}
             >
-              {isActive && (
-                <LinearGradient
-                  colors={[`${Brand.coral}20`, `${Brand.orange}20`]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={StyleSheet.absoluteFill}
-                />
-              )}
-              <Text style={styles.tabEmoji}>{cat.icon}</Text>
+              <Text style={[styles.tabEmoji, !isActive && styles.inactiveTabEmoji]}>
+                {cat.icon}
+              </Text>
+              {isActive && <View style={styles.activeIndicator} />}
             </TouchableOpacity>
           );
         })}
@@ -136,7 +130,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ visible, onSelect, onClose })
 const styles = StyleSheet.create({
   container: {
     height: 270,
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surface,
     borderTopLeftRadius: Radius.xl,
     borderTopRightRadius: Radius.xl,
     ...Shadow.lg,
@@ -157,23 +151,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Radius.md,
-    overflow: 'hidden',
+    position: 'relative',
+  },
+  activeTab: {
+    backgroundColor: `${Brand.primary}15`,
+  },
+  inactiveTab: {
+    backgroundColor: 'transparent',
+  },
+  activeIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    backgroundColor: Brand.primary,
+    borderBottomLeftRadius: Radius.md,
+    borderBottomRightRadius: Radius.md,
   },
   tabEmoji: {
     fontSize: 20,
     zIndex: 1,
+    color: Brand.text,
+  },
+  inactiveTabEmoji: {
+    opacity: 0.5,
+    color: Brand.subText,
   },
   closeButton: {
     width: 30,
     height: 30,
     borderRadius: Radius.full,
-    backgroundColor: Brand.warmGray,
+    backgroundColor: Brand.surfaceLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
   closeText: {
-    fontSize: 13,
-    color: Brand.grayDark,
+    fontSize: 14,
+    color: Brand.text,
     fontWeight: '600',
   },
   scrollArea: {

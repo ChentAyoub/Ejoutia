@@ -23,7 +23,6 @@ import {
   TouchableOpacity,
   Vibration,
   View,
-  ImageBackground,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import ConfettiCannon from "react-native-confetti-cannon";
@@ -263,25 +262,25 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
               {!isMine && item.status === "pending" && (
                 <View style={s.offerButtons}>
                   <TouchableOpacity
-                    style={[s.offerBtn, { backgroundColor: Brand.primaryLight }]}
+                    style={[s.offerBtn, { backgroundColor: Brand.primary }]}
                     onPress={() => respondToOffer(item, "accepted")}
                   >
                     <Text style={s.offerBtnText}>Accepter</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[s.offerBtn, { backgroundColor: Brand.red }]}
+                    style={[s.offerBtn, { backgroundColor: Brand.surfaceLight }]}
                     onPress={() => respondToOffer(item, "refused")}
                   >
-                    <Text style={s.offerBtnText}>Refuser</Text>
+                    <Text style={[s.offerBtnText, { color: Brand.text }]}>Refuser</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[s.offerBtn, { backgroundColor: Brand.charcoal }]}
+                    style={[s.offerBtn, { backgroundColor: Brand.surface }]}
                     onPress={() => {
                       setCounterModal(item);
                       setAmountInput("");
                     }}
                   >
-                    <Text style={s.offerBtnText}>Contre-offre</Text>
+                    <Text style={[s.offerBtnText, { color: Brand.text }]}>Contre-offre</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -355,12 +354,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
     <View style={s.container}>
       <ChatHeader role={role} otherUser={otherUser} listing={listing} />
 
-      <ImageBackground
-        style={s.chatArea}
-        source={require('../../assets/images/chat_pattern_bg.png')}
-        resizeMode="cover"
-        blurRadius={6}
-      >
+      <View style={s.chatArea}>
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -373,7 +367,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
           }
           ListEmptyComponent={renderSuggestions}
         />
-      </ImageBackground>
+      </View>
 
       {/* Floating Pill Input */}
       <View style={s.floatingInputContainer}>
@@ -402,7 +396,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
               value={messageText}
               onChangeText={setMessageText}
               placeholder="Message..."
-              placeholderTextColor={Brand.grayDark}
+              placeholderTextColor={Brand.subText}
               multiline
               onFocus={() => setShowEmoji(false)}
             />
@@ -453,7 +447,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
                 style={s.hugeInput}
                 keyboardType="numeric"
                 placeholder="0"
-                placeholderTextColor={Brand.grayMed}
+                placeholderTextColor={Brand.subText}
                 value={amountInput}
                 onChangeText={setAmountInput}
                 autoFocus
@@ -520,7 +514,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
                 style={s.hugeInput}
                 keyboardType="numeric"
                 placeholder="0"
-                placeholderTextColor={Brand.grayMed}
+                placeholderTextColor={Brand.subText}
                 value={amountInput}
                 onChangeText={setAmountInput}
               />
@@ -573,17 +567,17 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
 
 // ─── Styles ───
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Brand.offWhite },
-  loading: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Brand.offWhite },
+  container: { flex: 1, backgroundColor: Brand.bgDark },
+  loading: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: Brand.bgDark },
 
-  chatArea: { flex: 1 },
+  chatArea: { flex: 1, backgroundColor: Brand.bgDark },
   chatContent: { paddingHorizontal: 16, paddingVertical: 12, flexGrow: 1, justifyContent: "flex-end", paddingBottom: 100 },
 
   messageWrapper: { marginBottom: 12 },
   
   timeStamp: {
     textAlign: "center",
-    color: Brand.grayDark,
+    color: Brand.subText,
     fontSize: 12,
     fontWeight: "600",
     marginVertical: 16,
@@ -603,28 +597,25 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 12,
-    ...Shadow.sm,
   },
   sharpRight: { borderBottomRightRadius: 4 },
   sharpLeft: { borderBottomLeftRadius: 4 },
   
-  bubbleTheirs: { backgroundColor: Brand.white },
+  bubbleTheirs: { backgroundColor: Brand.surfaceLight },
   
   bubbleText: { fontSize: 16, lineHeight: 22, flexShrink: 1 },
-  bubbleTextMine: { color: "#fff", fontWeight: "500" },
-  bubbleTextTheirs: { color: Brand.charcoal, fontWeight: "500" },
+  bubbleTextMine: { color: "#FFF", fontWeight: "500" },
+  bubbleTextTheirs: { color: Brand.text, fontWeight: "500" },
 
   bubbleTimeInside: { fontSize: 10, fontWeight: "600", marginBottom: 2 },
   bubbleTimeMine: { color: "rgba(255,255,255,0.7)" },
-  bubbleTimeTheirs: { color: Brand.grayDark },
+  bubbleTimeTheirs: { color: Brand.subText },
 
   suggestionsWrap: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 24, paddingBottom: 20 },
-  suggestionsTitle: { fontSize: 16, fontWeight: "700", color: Brand.grayDark, marginBottom: 24, textAlign: "center" },
+  suggestionsTitle: { fontSize: 16, fontWeight: "700", color: Brand.subText, marginBottom: 24, textAlign: "center" },
   suggestionsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 12 },
   suggestionPill: {
-    backgroundColor: Brand.white,
-    borderWidth: 1,
-    borderColor: Brand.grayLight,
+    backgroundColor: Brand.surface,
     borderRadius: Radius.full,
     paddingHorizontal: 20,
     paddingVertical: 14,
@@ -642,7 +633,7 @@ const s = StyleSheet.create({
   floatingPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surface,
     borderRadius: 30,
     paddingHorizontal: 8,
     paddingVertical: 8,
@@ -656,83 +647,81 @@ const s = StyleSheet.create({
     maxHeight: 120,
     paddingHorizontal: 12,
     fontSize: 16,
-    color: Brand.charcoal,
+    color: Brand.text,
     fontWeight: "500",
   },
   sendCircleBtn: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
-  sendIcon: { color: "#fff", fontSize: 20, fontWeight: "800" },
-  micCircleBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: Brand.offWhite, alignItems: "center", justifyContent: "center" },
+  sendIcon: { color: "#FFF", fontSize: 20, fontWeight: "800" },
+  micCircleBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: Brand.surfaceLight, alignItems: "center", justifyContent: "center" },
   micIcon: { fontSize: 20 },
 
   recordingPill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surface,
     borderRadius: 30,
     paddingHorizontal: 16,
     paddingVertical: 12,
     ...Shadow.lg,
     gap: 12,
   },
-  recordingDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: Brand.red },
-  recordingText: { flex: 1, color: Brand.red, fontWeight: "700", fontSize: 16 },
-  recordingCancel: { width: 36, height: 36, borderRadius: 18, backgroundColor: Brand.redLight, alignItems: "center", justifyContent: "center" },
-  recordingCancelText: { color: Brand.red, fontWeight: "800", fontSize: 16 },
+  recordingDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: Brand.primary },
+  recordingText: { flex: 1, color: Brand.primary, fontWeight: "700", fontSize: 16 },
+  recordingCancel: { width: 36, height: 36, borderRadius: 18, backgroundColor: Brand.surfaceLight, alignItems: "center", justifyContent: "center" },
+  recordingCancelText: { color: Brand.text, fontWeight: "800", fontSize: 16 },
 
   offerCard: {
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surface,
     borderRadius: Radius.xxl,
     padding: 24,
     marginVertical: 6,
     minWidth: 240,
     alignItems: "center",
-    ...Shadow.md,
   },
-  offerAccepted: { backgroundColor: Brand.greenLight },
-  offerRefused: { backgroundColor: Brand.redLight },
+  offerAccepted: { backgroundColor: "rgba(52, 199, 89, 0.15)" },
+  offerRefused: { backgroundColor: "rgba(255, 59, 48, 0.15)" },
   offerLabel: { fontSize: 12, fontWeight: "800", color: Brand.primary, letterSpacing: 2 },
-  offerAmount: { fontSize: 36, fontWeight: "900", color: Brand.charcoal, marginVertical: 12 },
-  offerStatus: { color: Brand.grayDark, fontSize: 14, fontWeight: "600" },
+  offerAmount: { fontSize: 36, fontWeight: "900", color: Brand.text, marginVertical: 12 },
+  offerStatus: { color: Brand.subText, fontSize: 14, fontWeight: "600" },
   offerStatusOk: { color: Brand.green, fontWeight: "800", fontSize: 15 },
   offerStatusNo: { color: Brand.red, fontWeight: "800", fontSize: 15 },
   offerButtons: { flexDirection: "row", marginTop: 20, gap: 12, flexWrap: "wrap", justifyContent: "center" },
   offerBtn: { paddingHorizontal: 20, paddingVertical: 12, borderRadius: Radius.full },
-  offerBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  offerBtnText: { color: "#FFF", fontWeight: "700", fontSize: 14 },
 
-  modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "flex-end" },
+  modalBg: { flex: 1, backgroundColor: "rgba(0,0,0,0.8)", justifyContent: "flex-end" },
   modalGlass: {
-    backgroundColor: Brand.offWhite,
+    backgroundColor: Brand.surface,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: Platform.OS === "ios" ? 48 : 32,
   },
-  modalHandle: { width: 60, height: 6, borderRadius: 3, backgroundColor: Brand.grayMed, alignSelf: "center", marginBottom: 32 },
-  modalHugeTitle: { fontSize: 32, fontWeight: "900", color: Brand.charcoal, marginBottom: 8, textAlign: "center" },
-  modalSubTitle: { fontSize: 16, fontWeight: "600", color: Brand.grayDark, marginBottom: 32, textAlign: "center" },
+  modalHandle: { width: 60, height: 6, borderRadius: 3, backgroundColor: Brand.surfaceLight, alignSelf: "center", marginBottom: 32 },
+  modalHugeTitle: { fontSize: 32, fontWeight: "900", color: Brand.text, marginBottom: 8, textAlign: "center" },
+  modalSubTitle: { fontSize: 16, fontWeight: "600", color: Brand.subText, marginBottom: 32, textAlign: "center" },
   
   hugeInputWrapper: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", marginBottom: 40 },
   hugeInput: { fontSize: 64, fontWeight: "900", color: Brand.primary, textAlign: "center" },
-  hugeCurrency: { fontSize: 24, fontWeight: "800", color: Brand.grayDark, marginLeft: 8 },
+  hugeCurrency: { fontSize: 24, fontWeight: "800", color: Brand.subText, marginLeft: 8 },
 
   presetRow: { flexDirection: "row", gap: 12, marginBottom: 40 },
   presetPill: {
     flex: 1,
-    backgroundColor: Brand.white,
+    backgroundColor: Brand.surfaceLight,
     paddingVertical: 16,
     borderRadius: Radius.full,
     alignItems: "center",
-    ...Shadow.sm,
   },
-  presetPillText: { color: Brand.charcoal, fontWeight: "800", fontSize: 16 },
+  presetPillText: { color: Brand.text, fontWeight: "800", fontSize: 16 },
   presetPillActive: { backgroundColor: Brand.primary },
-  presetPillTextActive: { color: Brand.white },
+  presetPillTextActive: { color: "#FFF" },
 
   modalActionsRow: { flexDirection: "row", gap: 16, alignItems: "center" },
   modalCancelFlat: { flex: 1, paddingVertical: 20, alignItems: "center", justifyContent: "center" },
-  modalCancelFlatText: { fontWeight: "700", color: Brand.grayDark, fontSize: 18 },
-  modalSendHuge: { flex: 2, borderRadius: Radius.full, overflow: "hidden", ...Shadow.lg },
+  modalCancelFlatText: { fontWeight: "700", color: Brand.subText, fontSize: 18 },
+  modalSendHuge: { flex: 2, borderRadius: Radius.full, overflow: "hidden" },
   modalSendHugeGradient: { paddingVertical: 20, alignItems: "center", justifyContent: "center" },
-  modalSendHugeText: { color: "#fff", fontWeight: "800", fontSize: 18 },
+  modalSendHugeText: { color: "#FFF", fontWeight: "800", fontSize: 18 },
 });

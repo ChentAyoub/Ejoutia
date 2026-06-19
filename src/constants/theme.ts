@@ -1,47 +1,56 @@
 export const Brand = {
-  // New Dark Green Premium Palette
-  primary: '#08403E',       // Deep Forest Green
-  primaryLight: '#187063',  // Vibrant Mint/Emerald
-  primaryDark: '#042826',   // Very Dark Green
+  // Deep Moroccan Night Market Theme
+  primary: '#ff6f00',       // Warm Orange
+  primaryLight: '#ff9e40',  // Lighter Orange
+  primaryDark: '#c43e00',   // Dark Orange
   
-  // Replacing old coral/orange variables with the new green ones to prevent breaking changes in some components
-  coral: '#08403E',       
-  orange: '#187063',      
+  // Backwards compatibility mappings for older components until refactored
+  coral: '#ff6f00',       
+  orange: '#ff9e40',      
   
   // Accents
   blue: '#4A90D9',
   blueLight: '#E8F2FC',
   green: '#34C759',
-  greenLight: '#EAF9EE',
+  greenLight: 'rgba(52, 199, 89, 0.15)', // Dark mode friendly
   red: '#FF3B30',
-  redLight: '#FFEBEC',
+  redLight: 'rgba(255, 59, 48, 0.15)',   // Dark mode friendly
   
-  // Neutrals
+  // Surfaces & Backgrounds
+  bgDark: '#121212',        // App Background
+  surface: '#1E1E1E',       // Cards / Modals
+  surfaceLight: '#2A2A2A',  // Received bubbles / hover states
+  
+  // Text Colors
+  text: '#F5F5F5',
+  subText: '#999999',
+  
+  // Old Neutrals (keeping them for compatibility, though we'll use new surfaces primarily)
   charcoal: '#1A1A2E',
   grayDark: '#8E8E93',
   grayMed: '#C7C7CC',
-  grayLight: '#E5E5EA',
-  warmGray: '#F4F7F6',    // Slightly cool/green tinted off-white
-  offWhite: '#FAFAFA',
-  white: '#FFFFFF',
+  grayLight: '#333333', // Darkened for dark mode borders
+  warmGray: '#1E1E1E',  // Mapped to surface
+  offWhite: '#121212',  // Mapped to bgDark
+  white: '#1E1E1E',     // Cards mapping to surface
 };
 
 export const Colors = {
   light: {
-    background: Brand.offWhite,
-    card: Brand.white,
-    text: Brand.charcoal,
-    subText: Brand.grayDark,
+    background: Brand.bgDark,
+    card: Brand.surface,
+    text: Brand.text,
+    subText: Brand.subText,
     border: Brand.grayLight,
     primary: Brand.primary,
   },
   dark: {
-    background: '#121212',
-    card: '#1E1E1E',
-    text: Brand.offWhite,
-    subText: Brand.grayMed,
-    border: '#333333',
-    primary: Brand.primaryLight,
+    background: Brand.bgDark,
+    card: Brand.surface,
+    text: Brand.text,
+    subText: Brand.subText,
+    border: Brand.grayLight,
+    primary: Brand.primary,
   },
 };
 
@@ -64,21 +73,21 @@ export const Shadow = {
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 2,
   },
   md: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.4,
     shadowRadius: 10,
     elevation: 4,
   },
   lg: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.5,
     shadowRadius: 16,
     elevation: 8,
   },
