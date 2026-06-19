@@ -1,4 +1,4 @@
-<img width="387" height="837" alt="Screenshot 2026-06-19 043922" src="https://github.com/user-attachments/assets/cfe0fba1-a45a-4f41-8ace-2507d78806b3" /><img width="384" height="835" alt="fig_offer_accepted png" src="https://github.com/user-attachments/assets/20ef271c-61ae-45af-81a2-a98e5aafd1b6" /><img width="386" height="846" alt="fig_header png" src="https://github.com/user-attachments/assets/2dbce930-c34a-4904-a5f6-cd3a5625efab" /># E-Joutia : Messagerie Instantanée Intégrée (Projet 5) 🇲🇦
+# E-Joutia : Messagerie Instantanée Intégrée (Projet 5) 🇲🇦
 
 Bienvenue sur le dépôt du **Projet 5** de l'application E-Joutia. Ce module constitue le cœur de la communication entre les vendeurs et les acheteurs de la plateforme de seconde main. Développé en React Native et Expo, il inclut une interface de chat complète et un système de négociation d'offres en temps réel propulsé par Firebase Firestore.
 
