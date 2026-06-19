@@ -359,6 +359,7 @@ export default function ChatScreen({ role }: { role: "buyer" | "seller" }) {
         style={s.chatArea}
         source={require('../../assets/images/chat_pattern_bg.png')}
         resizeMode="cover"
+        blurRadius={6}
       >
         <FlatList
           ref={flatListRef}

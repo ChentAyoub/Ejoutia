@@ -32,11 +32,19 @@ export default function ChatHeader({
 }) {
   const router = useRouter();
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* ── Minimal Header ── */}
       <View style={styles.headerCore}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Text style={styles.backText}>‹</Text>
         </TouchableOpacity>
         
